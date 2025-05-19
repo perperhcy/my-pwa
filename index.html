@@ -1,23 +1,77 @@
 <!DOCTYPE html>
 <html lang="zh">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>我的PWA</title>
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#317EFB" />
-    <link rel="icon" href="icon.png" />
-  </head>
-  <body>
-    <h1>Hello, PWA！</h1>
-    <p>这是一个最简单的渐进式网页应用。</p>
-    <script>
-      // 注册 Service Worker
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("service-worker.js").then(function () {
-          console.log("Service Worker 注册成功");
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的 PWA</title>
+
+  <!-- Android / 常规浏览器用 -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#317EFB" />
+
+  <!-- iOS 专用 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="我的PWA" />
+  <link rel="apple-touch-icon" href="icon.png" />
+
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+    }
+    #installBtn {
+      display: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #317EFB;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>欢迎使用我的 PWA 应用</h1>
+  <p>你可以把它添加到主屏幕，像 App 一样使用！</p>
+
+  <button id="installBtn">安装到主屏幕</button>
+
+  <script>
+    // 注册 service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker 注册成功'))
+        .catch((err) => console.error('❌ 注册失败:', err));
+    }
+
+    // 安装提示
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('✅ 用户接受了安装');
+          } else {
+            console.log('❌ 用户拒绝了安装');
+          }
+          deferredPrompt = null;
         });
       }
-    </script>
-  </body>
+    });
+  </script>
+
+</body>
 </html>
