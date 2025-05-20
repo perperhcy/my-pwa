@@ -1,77 +1,99 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>我的 PWA</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我的 PWA</title>
 
-  <!-- Android / 常规浏览器用 -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#317EFB" />
+    <!-- Android / 常规浏览器用 -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#317EFB" />
 
-  <!-- iOS 专用 -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="我的PWA" />
-  <link rel="apple-touch-icon" href="icon.png" />
+    <!-- iOS 专用 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="我的PWA" />
+    <link rel="apple-touch-icon" href="icon.png" />
 
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2em;
-    }
-    #installBtn {
-      display: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #317EFB;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>欢迎使用我的 PWA 应用</h1>
-  <p>你可以把它添加到主屏幕，像 App 一样使用！</p>
-
-  <button id="installBtn">安装到主屏幕</button>
-
-  <script>
-    // 注册 service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('✅ Service Worker 注册成功'))
-        .catch((err) => console.error('❌ 注册失败:', err));
-    }
-
-    // 安装提示
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'inline-block';
-    });
-
-    installBtn.addEventListener('click', () => {
-      installBtn.style.display = 'none';
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('✅ 用户接受了安装');
-          } else {
-            console.log('❌ 用户拒绝了安装');
-          }
-          deferredPrompt = null;
-        });
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        padding: 2em;
       }
-    });
-  </script>
+      #installBtn {
+        display: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        background: #317efb;
+        color: white;
+        border: none;
+        border-radius: 5px;
+      }
+      .launch-status {
+        margin: 20px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>欢迎使用我的 PWA 应用</h1>
+    <p>你可以把它添加到主屏幕，像 App 一样使用！</p>
+    <div id="launchStatus" class="launch-status"></div>
+    <button id="installBtn">安装到主屏幕</button>
 
-</body>
+    <script>
+      // 注册 service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then(() => console.log("✅ Service Worker 注册成功"))
+          .catch((err) => console.error("❌ 注册失败:", err));
+      }
+
+      // 判断是否是从主屏幕启动（iOS）
+      const launchStatus = document.getElementById("launchStatus");
+      if (
+        navigator.standalone ||
+        window.matchMedia("(display-mode: standalone)").matches
+      ) {
+        launchStatus.textContent = "✅ 当前是从主屏幕启动的";
+        launchStatus.style.backgroundColor = "#e6ffe6";
+        console.log("✅ 当前是从主屏幕启动的");
+      } else {
+        launchStatus.textContent = "📱 当前是在浏览器中打开的";
+        launchStatus.style.backgroundColor = "#fff3e6";
+        console.log("📱 当前是在浏览器中打开的");
+      }
+
+      // 安装提示
+      let deferredPrompt;
+      const installBtn = document.getElementById("installBtn");
+
+      //在 Chrome（和大多数 Android 浏览器） 中，一旦用户已经安装过这个 PWA：beforeinstallprompt 事件就不会再次触发，
+      //在 iOS（Safari） 上，没有 beforeinstallprompt 事件
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = "inline-block";
+      });
+
+      installBtn.addEventListener("click", () => {
+        installBtn.style.display = "none";
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("✅ 用户接受了安装");
+            } else {
+              console.log("❌ 用户拒绝了安装");
+            }
+            deferredPrompt = null;
+          });
+        }
+      });
+    </script>
+  </body>
 </html>
