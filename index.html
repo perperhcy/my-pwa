@@ -39,10 +39,15 @@
     </style>
   </head>
   <body>
-    <h1>欢迎使用我的 PWA 应用</h1>
-    <p>你可以把它添加到主屏幕，像 App 一样使用！</p>
-    <div id="launchStatus" class="launch-status"></div>
-    <button id="installBtn">安装到主屏幕</button>
+    <nav>
+      <a href="#" onclick="loadPage('home')">首页</a>
+      <a href="#" onclick="loadPage('about')">关于</a>
+      <a href="#" onclick="loadPage('contact')">联系我们</a>
+    </nav>
+
+    <div id="app">
+      <!-- 页面内容将在这里动态加载 -->
+    </div>
 
     <script>
       // 注册 service worker
@@ -94,6 +99,22 @@
           });
         }
       });
+
+      // 页面加载函数
+      async function loadPage(pageName) {
+        const app = document.getElementById("app");
+        try {
+          const response = await fetch(`/pages/${pageName}.html`);
+          const html = await response.text();
+          app.innerHTML = html;
+        } catch (error) {
+          console.error("页面加载失败:", error);
+          app.innerHTML = "<p>页面加载失败</p>";
+        }
+      }
+
+      // 默认加载首页
+      loadPage("home");
     </script>
   </body>
 </html>
