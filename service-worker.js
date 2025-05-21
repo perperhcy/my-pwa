@@ -11,8 +11,8 @@ const urlsToCache = [
 self.addEventListener("install", (event) => {
   console.log("Service Worker 安装完成");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
+    caches.open("pwa-cache").then((cache) => {
+      return cache.addAll(["index.html"]);
     })
   );
 });
